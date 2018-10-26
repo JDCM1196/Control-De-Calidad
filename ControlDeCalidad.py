@@ -2,10 +2,13 @@ import cv2
 import numpy as np
 from matplotlib import pyplot as plt
 
-IM_NAME = 'image3.png'
+IM_NAME = 'image5.png'
 
 #Leer la imagen
 img = cv2.imread(IM_NAME)
+cv2.imshow( "Display window", img)
+
+cv2.waitKey(0);
 
 
 ####################################################################################################################################################
@@ -18,7 +21,7 @@ imgray = cv2.imread(IM_NAME, 0)
 escala = 1
 
 #Binarizar la imagen
-th,imBinary = cv2.threshold(imgray, 30, 255, 1)								#El threshold hay que alterarlo al hacer pruebas con la tabla pintada
+th,imBinary = cv2.threshold(imgray, 40, 255, 1)								#El threshold hay que alterarlo al hacer pruebas con la tabla pintada
 
 
 #Obtener las posiciones de los pixeles, inicial y final, que no sean cero
@@ -49,17 +52,17 @@ blue = cv2.transform(img, justBlue)
 ####################imCropped = blue[rowFirst:rowLast, colFirst:colLast]
 
 #Mientras no se tenga foto sin orilla negra de una tabla azul:
-imCropped = blue[500:2500, 50:1500]
+imCropped = blue[rowFirst:rowLast, colFirst:colLast]
 
 #Constante que equivale al color de la pintura
-const = 150
+const = 210
 
 acabado = True
 
 ####################for i in range(colFirst, colLast):
 ####################for j in range(rowFirst, rowLast):
-for i in range(50, 1500):
-	for j in range(500, 2500):
+for i in range(colFirst, colLast):
+	for j in range(rowFirst, rowLast):
 		I =  blue[j, i]
 		if (I > const):
 			acabado = False
@@ -85,7 +88,7 @@ edges = cv2.Canny(imBlurred, 0, 50)
 line_image = np.copy(edges) * 0
 
 #Detectar errores circulares
-circles = cv2.HoughCircles(image = imgrayBlurred, method = cv2.HOUGH_GRADIENT, dp = 1, minDist = 200, minRadius = 10, maxRadius = 100, param1 = 350, param2 = 15)
+circles = cv2.HoughCircles(image = imgrayBlurred, method = cv2.HOUGH_GRADIENT, dp = 1, minDist = 200, minRadius = 5, maxRadius = 50, param1 = 100, param2 = 23)
 
 print circles
 if circles is not None:
@@ -98,8 +101,9 @@ plt.imshow(imgrayBlurred, cmap = 'gray')
 plt.xticks([]), plt.yticks([])
 plt.show()
 
+
 #Detectar rectas en la imagen
-lines = cv2.HoughLinesP(image = edges, lines = np.array([]), rho = 1, theta = np.pi/180, threshold = 30, minLineLength = 30, maxLineGap = 200)
+lines = cv2.HoughLinesP(image = edges, lines = np.array([]), rho = 1, theta = np.pi/180, threshold = 30, minLineLength = 10, maxLineGap = 50)
 
 #for rho, theta in lines[0]:
 #    a = np.cos(theta)
