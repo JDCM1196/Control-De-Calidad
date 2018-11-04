@@ -6,16 +6,16 @@ IM_NAME = 'image5.png'
 
 #Leer la imagen
 img = cv2.imread(IM_NAME)
-cv2.imshow( "Display window", img)
-
+cv2.imshow("Display window", img)
 cv2.waitKey(0);
+cv2.destroyAllWindows()
 
 
 ####################################################################################################################################################
 #Obtener las dimensiones de la tabla
 
 #Leer la imagen como escala de grises
-imgray = cv2.imread(IM_NAME, 0)
+imgray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
 
 #Definir la escala para pixeles:cm
 escala = 1
@@ -33,10 +33,10 @@ nonZMax = np.amax(nonZPos, axis = 0)
 rowLast = nonZMax.item(0)
 colLast = nonZMax.item(1)
 
-#print rowFirst
-#print colFirst
-#print rowLast
-#print colLast
+print rowFirst
+print colFirst
+print rowLast
+print colLast
 
 largo = (rowLast - rowFirst)*escala
 ancho = (colLast - colFirst)*escala
@@ -53,6 +53,10 @@ blue = cv2.transform(img, justBlue)
 
 #Mientras no se tenga foto sin orilla negra de una tabla azul:
 imCropped = blue[rowFirst:rowLast, colFirst:colLast]
+
+#cv2.imshow("Display window", imCropped)
+#cv2.waitKey(0);
+#cv2.destroyAllWindows()
 
 #Constante que equivale al color de la pintura
 const = 210
@@ -84,8 +88,7 @@ imBlurred = cv2.GaussianBlur(imBinary, (5, 5), 4)
 imgrayBlurred = cv2.GaussianBlur(imgray, (5, 5), 4)
 
 
-edges = cv2.Canny(imBlurred, 0, 50)
-line_image = np.copy(edges) * 0
+edges = cv2.Canny(imgray, 150, 200, apertureSize = 3)
 
 #Detectar errores circulares
 circles = cv2.HoughCircles(image = imgrayBlurred, method = cv2.HOUGH_GRADIENT, dp = 1, minDist = 200, minRadius = 5, maxRadius = 50, param1 = 100, param2 = 23)
@@ -103,37 +106,18 @@ plt.show()
 
 
 #Detectar rectas en la imagen
-lines = cv2.HoughLinesP(image = edges, lines = np.array([]), rho = 1, theta = np.pi/180, threshold = 30, minLineLength = 10, maxLineGap = 50)
+edges2 = cv2.Canny(imgrayBlurred, 300, 200)
 
-#for rho, theta in lines[0]:
-#    a = np.cos(theta)
-#    b = np.sin(theta)
-#    x0 = a*rho
-#   y0 = b*rho
-#    x1 = int(x0 + 2000*(-b))
-#    y1 = int(y0 + 2000*(a))
-#    x2 = int(x0 - 2000*(-b))
-#    y2 = int(y0 - 2000*(a))
-
-    #cv2.line(imBlurred,(x1,y1),(x2,y2),(0, 0, 255), 2)
-#    cv2.line(imBlurred,(x1,y1),(x2,y2),(255, 0, 0), 2)
-#    print("Coordenada X de donde inicia el error: ")
-#    print x0
-#    print("Coordenada Y de donde inicia el error: ")
-#    print y0
-
-#plt.imshow(back, cmap = 'gray')
+lines = cv2.HoughLinesP(edges, 1, np.pi/180, 30, maxLineGap = 250)
+lines2 = cv2.HoughLinesP(edges2, 1, np.pi/180, 20, maxLineGap = 250)
 
 for line in lines:
-	for x1, y1, x2, y2 in line:
-		cv2.line(line_image, (x1, y1), (x2, y2), (255, 0, 0), 2)
-		print("Coordenadas de donde se encuentra el error: ")
-		print(x2-x1, abs(y2-y1))
+	if(line not in lines2):
+		x1, y1, x2, y2 = line[0]
+		cv2.line(imgray, (x1, y1), (x2, y2), (0, 255, 0), 3)
 
-lines_edges = cv2.addWeighted(edges, 0.8, line_image, 1, 0)
-
-plt.imshow(line_image, cmap = 'gray')
+plt.imshow(imgray, cmap = 'gray')
 plt.xticks([]), plt.yticks([])
 plt.show()
 
-##No funcionan los errores circulares, ni las rectas de la imagen img2.png
+#S=VI*
